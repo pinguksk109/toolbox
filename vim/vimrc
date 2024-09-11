@@ -1,0 +1,90 @@
+" 行番号
+set number
+" ファイルを上書きする前にバックアップを作ることを無効化
+set nowritebackup
+" ファイルを上書きする前にバックアップを作ることを無効化
+set nobackup
+" vim の矩形選択で文字が無くても右へ進める
+set virtualedit=block
+" 挿入モードでバックスペースで削除できるようにする
+set backspace=indent,eol,start
+" スワップファイルを作成しない
+set noswapfile
+
+"----------------------------------------
+" 検索
+"----------------------------------------
+" 検索するときに大文字小文字を区別しない
+set ignorecase
+" 小文字で検索すると大文字と小文字を無視して検索
+set smartcase
+" 検索がファイル末尾まで進んだら、ファイル先頭から再び検索
+set wrapscan
+" インクリメンタル検索 (検索ワードの最初の文字を入力した時点で検索が開始)
+set incsearch
+" 検索結果をハイライト表示
+set hlsearch
+
+"----------------------------------------
+" 表示設定
+"----------------------------------------
+" エラーメッセージの表示時にビープを鳴らさない
+set noerrorbells
+" Windowsでパスの区切り文字をスラッシュで扱う
+set shellslash
+" 対応する括弧やブレースを表示
+set showmatch matchtime=1
+" インデント方法の変更
+set cinoptions+=:0
+" 入力モードでTabキー押下時に半角スペースを挿入
+set expandtab
+" インデント幅
+set shiftwidth=2
+" タイトルを表示
+set title
+" シンタックスハイライトを有効にする
+syntax on
+
+"----------------------------------------
+" プログラミング支援
+"----------------------------------------
+" 自動インデントを有効にする
+set autoindent
+" スマートインデントを有効にする
+set smartindent
+" タブの幅を4に設定する
+set tabstop=4
+" 自動インデントの幅を4に設定する
+set shiftwidth=4
+" タブ文字をスペースに変換する
+set expandtab
+
+
+"----------------------------------------
+" そのほか
+"----------------------------------------
+" vimrcの設定を即時反映する
+augroup source-vimrc
+    autocmd!
+    autocmd BufWritePost *vimrc source $MYVIMRC | set foldmethod=marker
+    autocmd BufWritePost *gvimrc if has("gui_running") source $MYGVIMRC
+augroup END
+
+
+" HTML/XML閉じタグ自動補完
+augroup MyXML
+  autocmd!
+  autocmd Filetype xml inoremap <buffer> </ </<C-x><C-o>
+  autocmd Filetype html inoremap <buffer> </ </<C-x><C-o>
+augroup END
+
+" 編集個所のカーソルを記憶
+if has("autocmd")
+    augroup redhat
+        autocmd BufRead *.txt set tw=78
+        autocmd BufReadPost *
+        \ if line("'\"") > 0 && line ("'\"") <= line("$") |
+        \ exe "normal! g'\"" |
+        \ endif
+    augroup END
+endif
