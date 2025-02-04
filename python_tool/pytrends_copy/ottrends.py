@@ -4,7 +4,7 @@ import pandas as pd
 import requests
 
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+from urllib3.util.retry import Retry
 from requests import status_codes
 
 from pytrends import exceptions
@@ -113,15 +113,17 @@ class TrendReq(object):
                 self.token_payload['req']['comparisonItem'].append(keyword_payload)
 
         self.token_payload['req'] = json.dumps(self.token_payload['req'])
-        self._token()
+        self._tokens()
         return
 
-    def _token(self):
+
+
+    def _tokens(self):
         widget_dicts = self._get_data(
             url=TrendReq.GENERAL_URL,
             method=TrendReq.POST_METHOD,
             params=self.token_payload,
-            trim_chats=4
+            trim_chars=4
         )['widgets']
         first_region_token = True
         self.related_queries_widget_list[:] = []
@@ -146,7 +148,7 @@ class TrendReq(object):
                           backoff_factor=self.backoff_factor,
                           status_forcelist=TrendReq.ERROR_CODES,
                           method_whitelist=frozenset(['GET', 'POST']))
-        s.mount('http://', HTTPAdapter(max_retries=retry))
+            s.mount('https://', HTTPAdapter(max_retries=retry))
 
         s.headers.update(self.headers)
         if len(self.proxies) > 0:
