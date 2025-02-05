@@ -173,6 +173,46 @@ class TrendReq(object):
                 raise exceptions.TooManyRequestsError.from_response(response)
             raise exceptions.ResponseError.from_response(response)
 
+    def interest_over_time(self):
+        over_time_payload = {
+            'req': json.dumps(self.interest_over_time_widget['request']),
+            'token': self.interest_over_time_widget['token'],
+            'tz': self.tz
+        }
+
+        req_json = self._get_data(
+            url=TrendReq.INTEREST_OVER_TIME_URL,
+            method=TrendReq.GET_METHOD,
+            trim_chars=5,
+            params=over_time_payload,
+        )
+
+        df = pd.DataFrame(req_json['default']['timelineData'])
+        if (df.empty):
+            return df
+
+        df['date'] = pd.to_datetime(df['time'].astype(dtype='float64'),
+                                    unit='s')
+        df = df.set_index(['date']).sort_index()
+        result_df = df['value'].apply(lambda x: pd.Series(
+            str(x).replace('[', '').replace(']', '').split(',')))
+        for idx, kw in enumerate(self.kw_list):
+            result_df.insert(len(result_df.columns), kw,
+                             result_df[idx].astype('int'))
+            del result_df[idx]
+
+        if 'isPatrial' in df:
+            df = df.fillna(False)
+            result_df2 = df['isPartial'].apply(lambda x: pd.Series(
+                str(x).replace('[', '').replace(']', '').split(',')))
+            result_df2.columns = ['isPartial']
+            result_df2.isPartial = result_df2.isPartial == 'True'
+            final = pd.concat([result_df, result_df2], axis=1)
+        else:
+            final = result_df
+            final['isPartial'] = False
+
+        return final
 
     def GetNewProxy(self):
         if self.proxy_index < (len(self.proxies) - 1):
